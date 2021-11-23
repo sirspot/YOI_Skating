@@ -9,8 +9,10 @@ g_FrameSettings.m_FrameAssets =
 [
 	assetsPathPng + "yoi_skating_bowl_soup.png",
 	assetsPathPng + g_YuriKatsuki.m_SkaterAssetFilename,
+	{id:"floor",   maxNum:1, src: assetsPathMp3 + "yoi_skating_music_floor.mp3"},
 	{id:"music",   maxNum:1, src: assetsPathMp3 + "yoi_skating_music_ice_rink.mp3"},
-	{id:"cheer",   maxNum:1, src: assetsPathMp3 + "yoi_skating_cheers_minor.mp3"},
+	{id:"cheer",   maxNum:1, src: assetsPathMp3 + "yoi_skating_cheers_basic.mp3"},
+	{id:"cheers",  maxNum:1, src: assetsPathMp3 + "yoi_skating_cheers_minor.mp3"},
 	{id:"cheers!", maxNum:1, src: assetsPathMp3 + "yoi_skating_cheers_major.mp3"},
 	{id:"start",   maxNum:1, src: assetsPathMp3 + "yoi_skating_skates_start.mp3"},
 	{id:"stop",    maxNum:1, src: assetsPathMp3 + "yoi_skating_skates_stop.mp3"},
@@ -42,9 +44,47 @@ let g_RectEntry = null;
 let g_RectFloor = null;
 let g_RectFloorTop = 0;
 let g_MouseButtonDown = false;
-let g_MouseButtonDownCount = 1;
-let g_Music = null;
+let g_MouseButtonDownCount = -1;
+let g_IceRinkMusic = null;
+let g_FloorMusic = null;
 let g_PorkCutletBowl = null;
+let g_FirstTransition = true;
+let g_Score = null;
+
+function SkaterMusicPlay()
+{
+	if(g_MouseButtonDownCount >= 0)
+	{
+		// mouse has been pressed at least once
+		if((g_YuriKatsuki.m_SkaterLocation == SkaterLocation_e.RINK_ICE) ||
+		   (g_YuriKatsuki.m_SkaterLocation == SkaterLocation_e.RINK_AIR))
+		{
+			// music on ice
+			if(g_IceRinkMusic == null)
+			{
+				g_IceRinkMusic = asset("music").play({volume:.04, loop:true, interrupt:"none"});
+			}
+			if(g_FloorMusic != null)
+			{
+				g_FloorMusic.stop();
+				g_FloorMusic = null;
+			}
+		}
+		else
+		{
+			// music on ground
+			if(g_FloorMusic == null)
+			{
+				g_FloorMusic = asset("floor").play({volume:.04, loop:true, interrupt:"none"});
+			}			
+			if(g_IceRinkMusic != null)
+			{
+				g_IceRinkMusic.stop();
+				g_IceRinkMusic = null;
+			}
+		}
+	}
+}
 
 /** when the skater animation is done this
     function will set the new state
@@ -73,11 +113,7 @@ function SkaterAnimationDone()
 			// done landing onto the ground
 			g_RectFloor.color = convertColor("rgba(175,175,175,255)"); 
 			g_YuriKatsuki.m_SkaterSprite.body.GetFixtureList().SetFriction(.02);
-			if(g_Music)
-			{
-				g_Music.stop();
-				g_Music = null;
-			}
+			asset("cheer").play({volume:.15, interrupt:"none"});
 		}
 	}
 	else if(g_YuriKatsuki.m_SkaterState == SkaterState_e.JUMPING)
@@ -87,7 +123,7 @@ function SkaterAnimationDone()
 		//
 		g_YuriKatsuki.m_SkaterState = SkaterState_e.JUMPED;
 		g_RectFloor.color = IceColor_e.LIGHTEST;
-		asset("cheer").play({volume:.1, interrupt:"none"});
+		asset("cheers").play({volume:.1, interrupt:"none"});
 	}
 	else if(g_YuriKatsuki.m_SkaterState == SkaterState_e.IDLE)
 	{
@@ -99,14 +135,7 @@ function SkaterAnimationDone()
 			// became idle on the ground
 			g_RectFloor.color = convertColor("rgba(175,175,175,255)"); 
 			g_YuriKatsuki.m_SkaterSprite.body.GetFixtureList().SetFriction(.02);
-			if(g_Music)
-			{
-				g_Music.stop();
-				g_Music = null;
-				g_MouseButtonDownCount = 1;
-			}
 		}
-
 	}
 }
 
@@ -152,11 +181,21 @@ g_ZimFrame.on("ready",
 		//
 		// RINK ENTRY
 		//
+		const entryPos = 600;
 		g_RectEntry = new Rectangle(10, g_FrameSettings.m_FrameHeight-g_PhysicsMargin.bottom)
 						.centerReg()
-						.pos(g_PhysicsMargin.right + 600, 0)
+						.pos(g_PhysicsMargin.right + entryPos, 0)
 						.addPhysics({categoryBits:2,dynamic:false});
 		g_RectEntry.color = convertColor("rgba(175,175,175,128)");
+
+		//
+		// SCORE
+		//
+		const rinkWidth = g_FrameSettings.m_FrameWidth - (g_RectEntry.x + g_RectEntry.width);
+		zog("Rink Width = " + rinkWidth);
+		g_Score = ShowScore("Click to the left or right\nof Yuri to begin moving.", 0);
+		g_Score.addTo();
+		g_Score.pos(entryPos + (rinkWidth / 3), 60);
 
 		//
 		// YURI KATSUKI
@@ -181,7 +220,11 @@ g_ZimFrame.on("ready",
 		g_YuriKatsuki.m_SkaterSprite.contact(
 			function (obj, body)
 			{
-				if (obj == g_RectFloor)
+				if(obj == g_PorkCutletBowl)
+				{
+					g_PorkCutletBowl.impulse(g_YuriKatsuki.m_SkaterSpriteXMove,-5);
+				}
+				else if (obj == g_RectFloor)
 				{
 					g_RectFloor.color = IceColor_e.DARK;
 
@@ -193,6 +236,7 @@ g_ZimFrame.on("ready",
 
 					if(overIce)
 					{
+						ShowScore("Nice Landing", 1);
 						if(g_YuriKatsuki.m_SkaterLocation != SkaterLocation_e.RINK_ICE)
 						{
 							// skater hit the ice after last known location not over ice.
@@ -200,8 +244,6 @@ g_ZimFrame.on("ready",
 							g_YuriKatsuki.m_SkaterLocation = SkaterLocation_e.RINK_ICE;
 							g_YuriKatsuki.m_SkaterSprite.body.GetFixtureList().SetFriction(0);
 							SkaterAnimate("landing", g_YuriKatsuki, .2, SkaterState_e.LANDING, "land", SkaterAnimationDone);
-
-							g_MouseButtonDownCount = 0;
 						}
 						else
 						{
@@ -210,6 +252,10 @@ g_ZimFrame.on("ready",
 					}
 					else
 					{
+						if(g_MouseButtonDownCount >= 0)
+						{
+							ShowScore("Jumped out of the rink!",2);
+						}
 						if(g_YuriKatsuki.m_SkaterLocation != SkaterLocation_e.GROUND)
 						{
 							// skater hit the ground after last known location not on the ground.
@@ -268,7 +314,7 @@ g_ZimFrame.on("ready",
 				{
 					onIce = true;
 				}
-				if(onIce != g_YuriKatsuki.m_SkaterOnIce)
+				if(onIce != g_YuriKatsuki.m_SkaterOnIce || g_FirstTransition)
 				{
 					//
 					// SKATER MOVED FROM ICE TO GROUND OR VICE-VERSA
@@ -284,8 +330,7 @@ g_ZimFrame.on("ready",
 								g_RectFloor.color = IceColor_e.LIGHT;
 								g_YuriKatsuki.m_SkaterSprite.body.GetFixtureList().SetFriction(0);
 								SkaterAnimate("standing", g_YuriKatsuki, .1, SkaterState_e.STANDING, "stand", SkaterAnimationDone);
-							
-								g_MouseButtonDownCount = 0;
+								ShowScore("Click while skating to jump",0);
 							}
 							else
 							{
@@ -300,6 +345,11 @@ g_ZimFrame.on("ready",
 								g_YuriKatsuki.m_SkaterLocation = SkaterLocation_e.GROUND;
 								g_YuriKatsuki.m_SkaterSprite.body.GetFixtureList().SetFriction(.02);
 								SkaterAnimate("idle", g_YuriKatsuki, .1, SkaterState_e.IDLE, "idle", SkaterAnimationDone);
+								asset("cheer").play({volume:.1, interrupt:"none"});
+								if(g_MouseButtonDownCount >= 0)
+								{
+									ShowScore("Nice job!",4);
+								}
 							}
 							else
 							{
@@ -307,18 +357,14 @@ g_ZimFrame.on("ready",
 							}
 						}
 						g_YuriKatsuki.m_SkaterOnIce = onIce;
-						if(onIce && g_MouseButtonDownCount == 0)
-						{
-							if(g_Music == null)
-							{
-								g_Music = asset("music").play({volume:.04, loop:true, interrupt:"none"});
-							}
-						}
 					}
 					else
 					{
 						// skater is in the air still
 					}
+
+					SkaterMusicPlay();
+					g_FirstTransition = false;
 				}
 
 				if(g_YuriKatsuki.m_SkaterStartJump)
@@ -358,6 +404,7 @@ g_ZimFrame.on("ready",
 							yPush = (-80 * Math.abs(g_YuriKatsuki.m_SkaterSprite.scaleY));
 							xPush = (20 * Math.abs(g_YuriKatsuki.m_SkaterSprite.scaleX));
 							g_YuriKatsuki.m_SkaterBoostsRemaining = g_YuriKatsuki.m_SkaterBoostsRemaining - 1;
+							ShowScore("Amazing!",2);
 						}
 						else
 						{
@@ -465,28 +512,29 @@ g_ZimFrame.on("ready",
 								// skating
 								SkaterAnimate("skating", g_YuriKatsuki, .6, SkaterState_e.SKATING, "skate", SkaterAnimationDone);
 								asset("start").play({volume:.03, interrupt:"any"});
-								if(g_Music)
+								if(g_IceRinkMusic)
 								{
-									g_Music.volume = .04;
-									g_Music.paused = false;
+									g_IceRinkMusic.volume = .04;
+									g_IceRinkMusic.paused = false;
 								}
 							}
 							else if(g_YuriKatsuki.m_SkaterState != SkaterState_e.STANDING)
 							{
 								// done skating
 								SkaterAnimate("standing", g_YuriKatsuki, .1, SkaterState_e.STANDING, "stand", SkaterAnimationDone);
-								if(g_Music)
+								if(g_IceRinkMusic)
 								{
-									g_Music.volume = .03;
+									g_IceRinkMusic.volume = .03;
 								}
+								
 							}
 							else
 							{
 								if(Math.abs(g_YuriKatsuki.m_SkaterSpriteXMove) == 0)
 								{
-									if(g_Music)
+									if(g_IceRinkMusic)
 									{
-										g_Music.volume = .02;
+										g_IceRinkMusic.volume = .02;
 									}
 								}
 							}
@@ -546,14 +594,14 @@ g_ZimFrame.on("ready",
 			function(e) 
 			{
 				g_MouseButtonDown = true;
-				if(g_MouseButtonDownCount == 0)
+				if(g_MouseButtonDownCount == -1)
 				{
-					if(g_Music == null)
-					{
-						g_Music = asset("music").play({volume:.04, loop:true, interrupt:"none"});
-					}
+					// first time pressing the mouse
+					g_MouseButtonDownCount = 0;
+					g_FirstTransition = true;
 				}
 				g_MouseButtonDownCount = g_MouseButtonDownCount + 1;
+
 				if(g_YuriKatsuki.m_SkaterLocation == SkaterLocation_e.RINK_ICE)
 				{
 					// the skater is on the ice.
