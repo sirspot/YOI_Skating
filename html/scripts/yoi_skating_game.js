@@ -242,7 +242,7 @@ g_ZimFrame.on("ready",
 
 					if(overIce)
 					{
-						ShowScore("Nice Landing", 1);
+						ShowScore("Nice Landing", 1, true);
 						if(g_YuriKatsuki.m_SkaterLocation != SkaterLocation_e.RINK_ICE)
 						{
 							// skater hit the ice after last known location not over ice.
@@ -354,7 +354,7 @@ g_ZimFrame.on("ready",
 								asset("cheer").play({volume:.1, interrupt:"none"});
 								if(g_MouseButtonDownCount >= 0)
 								{
-									ShowScore("Nice job!",4);
+									ShowScore("Nice job!", 4, true);
 								}
 							}
 							else
@@ -410,7 +410,14 @@ g_ZimFrame.on("ready",
 							yPush = (-80 * Math.abs(g_YuriKatsuki.m_SkaterSprite.scaleY));
 							xPush = (20 * Math.abs(g_YuriKatsuki.m_SkaterSprite.scaleX));
 							g_YuriKatsuki.m_SkaterBoostsRemaining = g_YuriKatsuki.m_SkaterBoostsRemaining - 1;
-							ShowScore("Amazing!",2);
+							if(g_YuriKatsuki.m_SkaterBoostsRemaining > 0)
+							{
+								ShowScore("Amazing!", 2, true);
+							}
+							else
+							{
+								ShowScore("Incredible!", 2, true);
+							}
 						}
 						else
 						{
