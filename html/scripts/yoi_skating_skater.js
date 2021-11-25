@@ -61,6 +61,7 @@ const g_YuriKatsuki =
             land_skate_stand:{frames:[80,81,48,49,50,51,52,53,54,55,56,57,32]}
         }
     },
+    m_SkaterRect: null,
 	m_SkaterSprite: null,
 	m_SkaterSpriteIsAnimating: false,
     m_SkaterDistanceToCursor: 0,

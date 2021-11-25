@@ -1,5 +1,6 @@
 let g_ScoreMessage = null;
 let g_ScoreMessageTimer = null;
+let g_ScoreMessageAnimate = null;
 
 function ShowScore(message, showFor)
 {
@@ -9,7 +10,7 @@ function ShowScore(message, showFor)
             {
                 size:42,
                 font:"Verdana",
-                color:"rgba(256,256,256,.9)",
+                color:"rgba(255,255,255,1)",
                 align:"center",
                 lineHeight:50
             }

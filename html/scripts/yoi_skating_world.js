@@ -45,7 +45,7 @@ const g_PhysicsSettings =
 */
 const IceColor_e = 
 {
-	LIGHTEST: convertColor("rgba(200,250,251,255)"),
-	LIGHT: convertColor("rgba(150,250,251,255)"),
-	DARK: convertColor("rgba(100,250,251,255)")
+	LIGHTEST: convertColor("rgb(200,250,251)"),
+	LIGHT: convertColor("rgb(150,250,251)"),
+	DARK: convertColor("rgb(100,250,251)")
 };

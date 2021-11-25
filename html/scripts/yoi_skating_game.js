@@ -111,8 +111,8 @@ function SkaterAnimationDone()
 		else
 		{
 			// done landing onto the ground
-			g_RectFloor.color = convertColor("rgba(175,175,175,255)"); 
-			g_YuriKatsuki.m_SkaterSprite.body.GetFixtureList().SetFriction(.02);
+			g_RectFloor.color = convertColor("rgb(175,175,175)"); 
+			g_YuriKatsuki.m_SkaterRect.body.GetFixtureList().SetFriction(.02);
 			asset("cheer").play({volume:.15, interrupt:"none"});
 		}
 	}
@@ -133,8 +133,8 @@ function SkaterAnimationDone()
 		if(g_YuriKatsuki.m_SkaterLocation == SkaterLocation_e.GROUND)
 		{
 			// became idle on the ground
-			g_RectFloor.color = convertColor("rgba(175,175,175,255)"); 
-			g_YuriKatsuki.m_SkaterSprite.body.GetFixtureList().SetFriction(.02);
+			g_RectFloor.color = convertColor("rgb(175,175,175)"); 
+			g_YuriKatsuki.m_SkaterRect.body.GetFixtureList().SetFriction(.02);
 		}
 	}
 }
@@ -186,7 +186,7 @@ g_ZimFrame.on("ready",
 						.centerReg()
 						.pos(g_PhysicsMargin.right + entryPos, 0)
 						.addPhysics({categoryBits:2,dynamic:false});
-		g_RectEntry.color = convertColor("rgba(175,175,175,128)");
+		g_RectEntry.color = "rgba(175,175,175,.5)";
 
 		//
 		// SCORE
@@ -201,23 +201,29 @@ g_ZimFrame.on("ready",
 		// YURI KATSUKI
 		//
 		// create skater and add to the stage
+		g_YuriKatsuki.m_SkaterRect = new Rectangle(24,64);
+		g_YuriKatsuki.m_SkaterRect.color = "rgba(0,255,0,.2)";
+		g_YuriKatsuki.m_SkaterRect.sca(g_GlobalScale);
+		g_YuriKatsuki.m_SkaterRect.centerReg();
+		g_YuriKatsuki.m_SkaterRect.addTo();
+
 		g_YuriKatsuki.m_SkaterAsset = asset(assetsPathPng + g_YuriKatsuki.m_SkaterAssetFilename);
 		g_YuriKatsuki.m_SkaterSpriteSettings.image = g_YuriKatsuki.m_SkaterAsset;
 		g_YuriKatsuki.m_SkaterSprite = new Sprite(g_YuriKatsuki.m_SkaterSpriteSettings);
-		g_YuriKatsuki.m_SkaterSprite.addTo();
-		g_YuriKatsuki.m_SkaterSprite.sca(g_GlobalScale);
 		g_YuriKatsuki.m_SkaterSprite.centerReg();
+		g_YuriKatsuki.m_SkaterSprite.pos(-20,0);
+		g_YuriKatsuki.m_SkaterRect.addChild(g_YuriKatsuki.m_SkaterSprite);
+
 		// calculate the size of skater on the stage
 		g_YuriKatsuki.m_SkaterWidth = (g_YuriKatsuki.m_SkaterSprite.width * g_YuriKatsuki.m_SkaterSprite.scaleX);
 		g_YuriKatsuki.m_SkaterHeight = (g_YuriKatsuki.m_SkaterSprite.height * g_YuriKatsuki.m_SkaterSprite.scaleY);
-		// move skater to a random starting position above the ice
-		g_YuriKatsuki.m_SkaterSprite.x = g_YuriKatsuki.m_SkaterWidth;
+		g_YuriKatsuki.m_SkaterRect.x = g_YuriKatsuki.m_SkaterWidth;
 		g_YuriKatsuki.m_SkaterOnIce = false;
-		g_YuriKatsuki.m_SkaterSprite.y = (g_FrameSettings.m_FrameHeight - g_YuriKatsuki.m_SkaterHeight) - 20;
+		g_YuriKatsuki.m_SkaterRect.y = (g_FrameSettings.m_FrameHeight - g_YuriKatsuki.m_SkaterHeight) - 20;
 		// add to the physics world and set the function
 		// to handle contact with the physics body
-		g_YuriKatsuki.m_SkaterSprite.addPhysics(g_YuriKatsuki.m_SkaterSpritePhysicsSettings);
-		g_YuriKatsuki.m_SkaterSprite.contact(
+		g_YuriKatsuki.m_SkaterRect.addPhysics(g_YuriKatsuki.m_SkaterSpritePhysicsSettings);
+		g_YuriKatsuki.m_SkaterRect.contact(
 			function (obj, body)
 			{
 				if(obj == g_PorkCutletBowl)
@@ -229,7 +235,7 @@ g_ZimFrame.on("ready",
 					g_RectFloor.color = IceColor_e.DARK;
 
 					let overIce = false;
-					if(g_YuriKatsuki.m_SkaterSprite.x > g_RectEntry.x)
+					if(g_YuriKatsuki.m_SkaterRect.x > g_RectEntry.x)
 					{
 						overIce = true;
 					}
@@ -242,7 +248,7 @@ g_ZimFrame.on("ready",
 							// skater hit the ice after last known location not over ice.
 							// start landing immediately
 							g_YuriKatsuki.m_SkaterLocation = SkaterLocation_e.RINK_ICE;
-							g_YuriKatsuki.m_SkaterSprite.body.GetFixtureList().SetFriction(0);
+							g_YuriKatsuki.m_SkaterRect.body.GetFixtureList().SetFriction(0);
 							SkaterAnimate("landing", g_YuriKatsuki, .2, SkaterState_e.LANDING, "land", SkaterAnimationDone);
 						}
 						else
@@ -279,7 +285,7 @@ g_ZimFrame.on("ready",
 		g_PorkCutletBowl.addTo();
 		g_PorkCutletBowl.centerReg();
 		g_PorkCutletBowl.sca(.3);
-		g_PorkCutletBowl.pos(g_YuriKatsuki.m_SkaterSprite.x + g_YuriKatsuki.m_SkaterWidth*2, g_RectFloorTop - g_PorkCutletBowl.height*g_PorkCutletBowl.scaleY);
+		g_PorkCutletBowl.pos(entryPos + (rinkWidth/2), g_RectFloorTop - g_PorkCutletBowl.height*g_PorkCutletBowl.scaleY);
 		g_PorkCutletBowl.addPhysics({friction:.8,
         bounciness:.4,
         maskBits:1|2,
@@ -298,19 +304,19 @@ g_ZimFrame.on("ready",
 				let xPush = 0;
 
 				// determine the distance from the skater to the mouse cursor
-				g_YuriKatsuki.m_SkaterDistanceToCursor = (g_ZimFrame.mouseX - g_YuriKatsuki.m_SkaterSprite.x);
+				g_YuriKatsuki.m_SkaterDistanceToCursor = (g_ZimFrame.mouseX - g_YuriKatsuki.m_SkaterRect.x);
 
 				// calculate skater X position movement
-				g_YuriKatsuki.m_SkaterSpriteXMove = (g_YuriKatsuki.m_SkaterSprite.x - g_YuriKatsuki.m_SkaterSpriteLastX);
-				g_YuriKatsuki.m_SkaterSpriteLastX = g_YuriKatsuki.m_SkaterSprite.x;
+				g_YuriKatsuki.m_SkaterSpriteXMove = (g_YuriKatsuki.m_SkaterRect.x - g_YuriKatsuki.m_SkaterSpriteLastX);
+				g_YuriKatsuki.m_SkaterSpriteLastX = g_YuriKatsuki.m_SkaterRect.x;
 
 				// calculate skater Y position movement
-				g_YuriKatsuki.m_SkaterSpriteYMove = (g_YuriKatsuki.m_SkaterSprite.y - g_YuriKatsuki.m_SkaterSpriteLastY);
-				g_YuriKatsuki.m_SkaterSpriteLastY = g_YuriKatsuki.m_SkaterSprite.y;
+				g_YuriKatsuki.m_SkaterSpriteYMove = (g_YuriKatsuki.m_SkaterRect.y - g_YuriKatsuki.m_SkaterSpriteLastY);
+				g_YuriKatsuki.m_SkaterSpriteLastY = g_YuriKatsuki.m_SkaterRect.y;
 
 				// determine skater relative location
 				let onIce = false;
-				if(g_YuriKatsuki.m_SkaterSprite.x > g_RectEntry.x)
+				if(g_YuriKatsuki.m_SkaterRect.x > g_RectEntry.x)
 				{
 					onIce = true;
 				}
@@ -328,7 +334,7 @@ g_ZimFrame.on("ready",
 								// skater location is now on the ice
 								g_YuriKatsuki.m_SkaterLocation = SkaterLocation_e.RINK_ICE;
 								g_RectFloor.color = IceColor_e.LIGHT;
-								g_YuriKatsuki.m_SkaterSprite.body.GetFixtureList().SetFriction(0);
+								g_YuriKatsuki.m_SkaterRect.body.GetFixtureList().SetFriction(0);
 								SkaterAnimate("standing", g_YuriKatsuki, .1, SkaterState_e.STANDING, "stand", SkaterAnimationDone);
 								ShowScore("Click while skating to jump",0);
 							}
@@ -343,7 +349,7 @@ g_ZimFrame.on("ready",
 							{
 								// skater location is now on the ground
 								g_YuriKatsuki.m_SkaterLocation = SkaterLocation_e.GROUND;
-								g_YuriKatsuki.m_SkaterSprite.body.GetFixtureList().SetFriction(.02);
+								g_YuriKatsuki.m_SkaterRect.body.GetFixtureList().SetFriction(.02);
 								SkaterAnimate("idle", g_YuriKatsuki, .1, SkaterState_e.IDLE, "idle", SkaterAnimationDone);
 								asset("cheer").play({volume:.1, interrupt:"none"});
 								if(g_MouseButtonDownCount >= 0)
@@ -455,7 +461,7 @@ g_ZimFrame.on("ready",
 					if(g_YuriKatsuki.m_SkaterLocation == SkaterLocation_e.RINK_AIR)
 					{
 						//zog("yPush = " + yPush + " and xPush = " + xPush);
-						g_YuriKatsuki.m_SkaterSprite.impulse(xPush, yPush);
+						g_YuriKatsuki.m_SkaterRect.impulse(xPush, yPush);
 					}
 				}
 				else if(xPush != 0)
@@ -463,7 +469,7 @@ g_ZimFrame.on("ready",
 					if(g_YuriKatsuki.m_SkaterLocation != SkaterLocation_e.RINK_AIR)
 					{
 						//zog("xPush = " + xPush);
-						g_YuriKatsuki.m_SkaterSprite.impulse(xPush, 0);
+						g_YuriKatsuki.m_SkaterRect.impulse(xPush, 0);
 					}
 				}
 
@@ -473,7 +479,7 @@ g_ZimFrame.on("ready",
 					{
 						// skater is in the air
 						let yuriKatsukiSpriteAnkleHeight = 10;
-						let yuriKatsukiSpriteAnklePos = g_YuriKatsuki.m_SkaterSprite.y - yuriKatsukiSpriteAnkleHeight;
+						let yuriKatsukiSpriteAnklePos = g_YuriKatsuki.m_SkaterRect.y - yuriKatsukiSpriteAnkleHeight;
 						let yuriKatsukiSpriteMinAnklePos = g_RectFloorTop - yuriKatsukiSpriteAnkleHeight;
 						if(g_YuriKatsuki.m_SkaterSpriteYMove > 0)
 						{
