@@ -7,6 +7,8 @@ let assetsPathPng = "png/";
 let assetsPathMp3 = "mp3/";
 g_FrameSettings.m_FrameAssets =
 [
+	assetsPathPng + "yoi_skating_bg.png",
+	assetsPathPng + "yoi_skating_fg.png",
 	assetsPathPng + "yoi_skating_bowl_soup.png",
 	assetsPathPng + g_YuriKatsuki.m_SkaterAssetFilename,
 	{id:"floor",   maxNum:1, src: assetsPathMp3 + "yoi_skating_music_floor.mp3"},
@@ -118,7 +120,7 @@ function SkaterAnimationDone()
 						// PORK CUTLET BOWL
 						//
 						g_PorkCutletBowl = asset(assetsPathPng + "yoi_skating_bowl_soup.png").addTo().centerReg();
-						g_PorkCutletBowl.addTo();
+						g_PorkCutletBowl.addTo().top().ord(-2);
 						g_PorkCutletBowl.centerReg();
 						g_PorkCutletBowl.sca(.3);
 						let bowlMargin = (g_PorkCutletBowl.width*g_PorkCutletBowl.scaleX)*8;
@@ -238,6 +240,8 @@ g_ZimFrame.on("ready",
 		g_ZimPhysics = new Physics(g_PhysicsSettings);
 		g_ZimPhysics.remove(g_ZimPhysics.borderTop);
 
+		let bgImg = asset(assetsPathPng + "yoi_skating_bg.png").addTo();
+
 		//
 		// FLOOR
 		//
@@ -281,6 +285,8 @@ g_ZimFrame.on("ready",
 		g_YuriKatsuki.m_SkaterSprite.centerReg();
 		g_YuriKatsuki.m_SkaterSprite.pos(-20,0);
 		g_YuriKatsuki.m_SkaterRect.addChild(g_YuriKatsuki.m_SkaterSprite);
+
+		let fgImg = asset(assetsPathPng + "yoi_skating_fg.png").addTo().top().alp(.4);
 
 		// calculate the size of skater on the stage
 		g_YuriKatsuki.m_SkaterWidth = (g_YuriKatsuki.m_SkaterSprite.width * g_YuriKatsuki.m_SkaterSprite.scaleX);
