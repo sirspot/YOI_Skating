@@ -51,6 +51,7 @@ let g_PorkCutletBowl = null;
 let g_FirstTransition = true;
 let g_Score = null;
 let g_Hangtime = 0;
+let g_ShowInstructionsTime = 0;
 const g_RinkEntryPosition = 600;
 
 function SkaterMusicPlay()
@@ -109,7 +110,6 @@ function SkaterAnimationDone()
 			{
 				if(g_YuriKatsuki.m_SkaterIsUp)
 				{
-					ShowScore("Incredible Jump\nEnjoy your Pork Cutlet Bowl!", 10, true);
 					asset("cheers!").play({volume:.15, interrupt:"none"});
 
 					if(g_PorkCutletBowl == null)
@@ -121,9 +121,9 @@ function SkaterAnimationDone()
 						g_PorkCutletBowl.addTo();
 						g_PorkCutletBowl.centerReg();
 						g_PorkCutletBowl.sca(.3);
-						let bowlMargin = (g_PorkCutletBowl.width*g_PorkCutletBowl.scaleX)*2;
+						let bowlMargin = (g_PorkCutletBowl.width*g_PorkCutletBowl.scaleX)*8;
 						let bowlXPos = g_YuriKatsuki.m_SkaterRect.x + bowlMargin;
-						if(bowlXPos > (g_RectFloor.x + g_RectFloor.width))
+						if(bowlXPos > (g_RectFloor.width - bowlMargin))
 						{
 							bowlXPos = (g_YuriKatsuki.m_SkaterRect.x - bowlMargin);
 						}
@@ -143,7 +143,12 @@ function SkaterAnimationDone()
 									categoryBits:1
 								}
 							);
-						g_PorkCutletBowl.impulse(0,-10);
+						g_PorkCutletBowl.impulse(0,-11);
+						ShowScore("Incredible Jump\nEnjoy your Pork Cutlet Bowl!", 8, true);
+					}
+					else
+					{
+						ShowScore("Wow!", 3, true);
 					}
 
 				}
@@ -231,6 +236,7 @@ g_ZimFrame.on("ready",
 
 		// create the physics world before adding items to it
 		g_ZimPhysics = new Physics(g_PhysicsSettings);
+		g_ZimPhysics.remove(g_ZimPhysics.borderTop);
 
 		//
 		// FLOOR
@@ -249,13 +255,13 @@ g_ZimFrame.on("ready",
 						.centerReg()
 						.pos(g_PhysicsMargin.right + g_RinkEntryPosition, 0)
 						.addPhysics({categoryBits:2,dynamic:false});
-		g_RectEntry.color = "rgba(175,175,175,.5)";
+		g_RectEntry.color = "rgba(175,175,175,.01)";
 
 		//
 		// SCORE
 		//
 		const rinkWidth = g_FrameSettings.m_FrameWidth - (g_RectEntry.x + g_RectEntry.width);
-		g_Score = ShowScore("Click to the left or right\nof Yuri to begin moving.", 0);
+		g_Score = ShowScore("Click to the left or right\nof Yuri to begin moving.", g_ShowInstructionsTime);
 		g_Score.addTo();
 		g_Score.pos(g_RinkEntryPosition + (rinkWidth / 3), 60);
 
@@ -279,7 +285,7 @@ g_ZimFrame.on("ready",
 		// calculate the size of skater on the stage
 		g_YuriKatsuki.m_SkaterWidth = (g_YuriKatsuki.m_SkaterSprite.width * g_YuriKatsuki.m_SkaterSprite.scaleX);
 		g_YuriKatsuki.m_SkaterHeight = (g_YuriKatsuki.m_SkaterSprite.height * g_YuriKatsuki.m_SkaterSprite.scaleY);
-		g_YuriKatsuki.m_SkaterRect.x = g_YuriKatsuki.m_SkaterWidth;
+		g_YuriKatsuki.m_SkaterRect.x = g_YuriKatsuki.m_SkaterWidth*2;
 		g_YuriKatsuki.m_SkaterOnIce = false;
 		g_YuriKatsuki.m_SkaterRect.y = (g_FrameSettings.m_FrameHeight - g_YuriKatsuki.m_SkaterHeight) - 20;
 		// add to the physics world and set the function
@@ -379,7 +385,7 @@ g_ZimFrame.on("ready",
 				g_YuriKatsuki.m_SkaterSpriteLastY = g_YuriKatsuki.m_SkaterRect.y;
 
 				// determine if skater is standing up
-				const offAxisMin = 4;
+				const offAxisMin = 15;
 				const offAxisMax = (360 - offAxisMin);
 				let offAxis = (Math.abs(g_YuriKatsuki.m_SkaterRect.rotation) % 360);
 				if((offAxis >= offAxisMin) && (offAxis <= offAxisMax))
@@ -415,7 +421,8 @@ g_ZimFrame.on("ready",
 								g_RectFloor.color = IceColor_e.LIGHT;
 								g_YuriKatsuki.m_SkaterRect.body.GetFixtureList().SetFriction(0);
 								SkaterAnimate("standing", g_YuriKatsuki, .1, SkaterState_e.STANDING, "stand", SkaterAnimationDone);
-								ShowScore("Skate to gain power and\nclick while skating to jump",0);
+								ShowScore("Skate to gain power and\nclick while skating to jump",g_ShowInstructionsTime);
+								g_ShowInstructionsTime = 5;
 							}
 							else
 							{
@@ -464,7 +471,7 @@ g_ZimFrame.on("ready",
 						g_YuriKatsuki.m_SkaterLocation = SkaterLocation_e.RINK_AIR;
 						SkaterAnimate("jump", g_YuriKatsuki, .15, SkaterState_e.JUMPING, "jump", SkaterAnimationDone);
 						asset("spin").play({volume:.05, interrupt:"any"});
-						yPush = (-75 * Math.abs(g_YuriKatsuki.m_SkaterSprite.scaleY));
+						yPush = (-65 * Math.abs(g_YuriKatsuki.m_SkaterSprite.scaleY));
 					}
 					else
 					{
@@ -486,7 +493,7 @@ g_ZimFrame.on("ready",
 							//
 							// JUMP BOOST
 							//
-							yPush = (-75 * Math.abs(g_YuriKatsuki.m_SkaterSprite.scaleY));
+							yPush = (-65 * Math.abs(g_YuriKatsuki.m_SkaterSprite.scaleY));
 							xPush = (20 * Math.abs(g_YuriKatsuki.m_SkaterSprite.scaleX));
 							g_YuriKatsuki.m_SkaterBoostsRemaining = g_YuriKatsuki.m_SkaterBoostsRemaining - 1;
 							if(g_YuriKatsuki.m_SkaterBoostsRemaining > 0)
@@ -535,13 +542,16 @@ g_ZimFrame.on("ready",
 					// no mouse button
 				}
 
+				// determine which direction for the skater to face
 				if(g_YuriKatsuki.m_SkaterDistanceToCursor > 0)
 				{
+					// facing to the left
 					xPush = xPush * -1;
 					g_YuriKatsuki.m_SkaterSprite.scaleX = Math.abs(g_YuriKatsuki.m_SkaterSprite.scaleX) * -1;
 				}
 				else
 				{
+					// facing to the right
 					g_YuriKatsuki.m_SkaterSprite.scaleX = Math.abs(g_YuriKatsuki.m_SkaterSprite.scaleX);
 				}
 
@@ -553,7 +563,7 @@ g_ZimFrame.on("ready",
 						{
 							if(HasJumpPower() == false)
 							{
-								yPush = (-10 * Math.abs(g_YuriKatsuki.m_SkaterSprite.scaleY));
+								yPush = (-15 * Math.abs(g_YuriKatsuki.m_SkaterSprite.scaleY));
 							}
 							//zog("yPush = " + yPush + " and xPush = " + xPush);
 							g_YuriKatsuki.m_SkaterRect.impulse(xPush, yPush);

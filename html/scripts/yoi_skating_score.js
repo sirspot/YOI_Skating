@@ -16,21 +16,21 @@ function ShowScore(message, showFor, allowAnimate)
     {
         g_ScoreMessage = new Label(
             {
-                size:40,
+                size:20,
                 font:"Verdana",
                 color:"rgba(255,255,255,1)",
                 align:"center",
-                lineHeight:50
+                lineHeight:30
             }
         );
 
         g_ScoreJumpCounter = new Label(
             {
-                size:40,
+                size:30,
                 font:"Verdana",
                 color:"rgba(255,255,255,0)",
-                align:"center",
-                lineHeight:50
+                align:"left",
+                lineHeight:40
             }
         );
     }
@@ -42,7 +42,7 @@ function ShowScore(message, showFor, allowAnimate)
             g_ScoreMessageEndPos = [g_ScoreMessage.x, g_ScoreMessage.y];
 
             g_ScoreJumpCounter.addTo(g_ScoreMessage.parent);
-            g_ScoreJumpCounter.x = g_ScoreMessageEndPos[0];
+            g_ScoreJumpCounter.x = g_ScoreMessageEndPos[0] + 100;
             g_ScoreJumpCounter.y = g_ScoreMessageEndPos[1] - 52;
             SetJumpPower(0);
         }
@@ -95,8 +95,12 @@ function SetJumpPower(level)
     }
     if(g_ScoreJumpLevel != i)
     {
-        g_ScoreJumpCounter.text = powerText;
         g_ScoreJumpLevel = i;
+        let powerDescription = "";
+        if(g_ScoreJumpLevel >= 1)
+        {
+            powerDescription = "Jump Power";
+        }
         let levelMultiplier = (g_ScoreJumpLevel / g_ScoreJumpLevelMin);
         if(levelMultiplier >= 3)
         {
@@ -117,6 +121,7 @@ function SetJumpPower(level)
         {
             g_ScoreJumpCounter.color = "rgba(200,200,200,.7)";
         }
+        g_ScoreJumpCounter.text = powerDescription + " " + powerText;
     }
 }
 
