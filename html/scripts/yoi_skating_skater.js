@@ -22,7 +22,7 @@ const SkaterLocation_e =
 	COUNT: 4
 };
 
-const g_SkaterBoostMax = 2;
+const g_SkaterBoostMax = 3;
 
 const g_YuriKatsuki =
 {
@@ -72,7 +72,8 @@ const g_YuriKatsuki =
     m_SkaterStartJump: false,
     m_SkaterBoostJump: false,
     m_SkaterBoostsRemaining: g_SkaterBoostMax,
-    m_SkaterOnIce: false
+    m_SkaterOnIce: false,
+    m_SkaterIsUp: true
 };
 
 function SkaterAnimate(

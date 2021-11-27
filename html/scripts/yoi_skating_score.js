@@ -2,7 +2,11 @@ let g_ScoreMessage = null;
 let g_ScoreMessageTimer = null;
 let g_ScoreMessageAnimate = null;
 let g_ScoreMessageStartPos = [0,0];
-let g_ScoreMessageEndPos = [0,0];
+let g_ScoreMessageEndPos = null;
+
+let g_ScoreJumpCounter = null;
+let g_ScoreJumpLevel = 0;
+const g_ScoreJumpLevelMax = 10;
 
 function ShowScore(message, showFor, allowAnimate)
 {
@@ -11,7 +15,17 @@ function ShowScore(message, showFor, allowAnimate)
     {
         g_ScoreMessage = new Label(
             {
-                size:42,
+                size:40,
+                font:"Verdana",
+                color:"rgba(255,255,255,1)",
+                align:"center",
+                lineHeight:50
+            }
+        );
+
+        g_ScoreJumpCounter = new Label(
+            {
+                size:40,
                 font:"Verdana",
                 color:"rgba(255,255,255,1)",
                 align:"center",
@@ -22,7 +36,15 @@ function ShowScore(message, showFor, allowAnimate)
     else
     {
         animateText = true;
-        g_ScoreMessageEndPos = [g_ScoreMessage.x, g_ScoreMessage.y];
+        if(g_ScoreMessageEndPos == null)
+        {
+            g_ScoreMessageEndPos = [g_ScoreMessage.x, g_ScoreMessage.y];
+
+            g_ScoreJumpCounter.addTo(g_ScoreMessage.parent);
+            g_ScoreJumpCounter.x = g_ScoreMessageEndPos[0];
+            g_ScoreJumpCounter.y = g_ScoreMessageEndPos[1] - 52;
+            SetJumpPower(0);
+        }
     }
 
     g_ScoreMessage.text = message;
@@ -58,4 +80,37 @@ function ShowScore(message, showFor, allowAnimate)
     }
 
     return g_ScoreMessage;
+}
+
+function SetJumpPower(level)
+{
+    let powerText = "";
+    let i = 0;
+    while((i < level) && (i < g_ScoreJumpLevelMax))
+    {
+        powerText = powerText + "|";
+        i++;
+    }
+    g_ScoreJumpCounter.text = powerText;
+    g_ScoreJumpLevel = i;
+}
+
+function IncreaseJumpPower()
+{
+    SetJumpPower(g_ScoreJumpLevel + 1);
+}
+
+function DecreaseJumpPower()
+{
+    let newJumpLevel = 0;
+    if(g_ScoreJumpLevel > 3)
+    {
+        newJumpLevel = g_ScoreJumpLevel - 3;
+    }
+    SetJumpPower(newJumpLevel);
+}
+
+function HasJumpPower()
+{
+    return (g_ScoreJumpLevel > 1);
 }
