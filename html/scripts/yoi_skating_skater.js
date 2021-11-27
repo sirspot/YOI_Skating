@@ -40,7 +40,8 @@ const g_YuriKatsuki =
         friction:0,
         bounciness:0,
         maskBits:1,
-        categoryBits:1
+        categoryBits:1,
+        angular: 10
     },
 
     m_SkaterSpriteSettings:

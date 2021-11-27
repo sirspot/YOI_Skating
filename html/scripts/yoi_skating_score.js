@@ -6,7 +6,8 @@ let g_ScoreMessageEndPos = null;
 
 let g_ScoreJumpCounter = null;
 let g_ScoreJumpLevel = 0;
-const g_ScoreJumpLevelMax = 10;
+const g_ScoreJumpLevelMax = 15;
+const g_ScoreJumpLevelMin = 3;
 
 function ShowScore(message, showFor, allowAnimate)
 {
@@ -27,7 +28,7 @@ function ShowScore(message, showFor, allowAnimate)
             {
                 size:40,
                 font:"Verdana",
-                color:"rgba(255,255,255,1)",
+                color:"rgba(255,255,255,0)",
                 align:"center",
                 lineHeight:50
             }
@@ -45,6 +46,12 @@ function ShowScore(message, showFor, allowAnimate)
             g_ScoreJumpCounter.y = g_ScoreMessageEndPos[1] - 52;
             SetJumpPower(0);
         }
+    }
+
+    if(g_ScoreMessageTimer)
+    {
+        g_ScoreMessageTimer.clear();
+        g_ScoreMessageTimer = null;
     }
 
     g_ScoreMessage.text = message;
@@ -67,11 +74,6 @@ function ShowScore(message, showFor, allowAnimate)
 
     if(showFor > 0)
     {
-        if(g_ScoreMessageTimer)
-        {
-            g_ScoreMessageTimer.clear();
-            g_ScoreMessageTimer = null;
-        }
         g_ScoreMessageTimer = timeout(showFor, function()
             {
                 g_ScoreMessage.text = "";
@@ -91,8 +93,31 @@ function SetJumpPower(level)
         powerText = powerText + "|";
         i++;
     }
-    g_ScoreJumpCounter.text = powerText;
-    g_ScoreJumpLevel = i;
+    if(g_ScoreJumpLevel != i)
+    {
+        g_ScoreJumpCounter.text = powerText;
+        g_ScoreJumpLevel = i;
+        let levelMultiplier = (g_ScoreJumpLevel / g_ScoreJumpLevelMin);
+        if(levelMultiplier >= 3)
+        {
+            // 9 and higher
+            g_ScoreJumpCounter.color = "rgba(50,255,50,1)";
+        }
+        else if(levelMultiplier >= 2)
+        {
+            // 6 and higher
+            g_ScoreJumpCounter.color = "rgba(150,255,150,.9)";
+        }
+        else if(levelMultiplier >= 1)
+        {
+            // 3 and higher
+            g_ScoreJumpCounter.color = "rgba(255,255,255,.8)";
+        }
+        else
+        {
+            g_ScoreJumpCounter.color = "rgba(200,200,200,.7)";
+        }
+    }
 }
 
 function IncreaseJumpPower()
@@ -103,14 +128,14 @@ function IncreaseJumpPower()
 function DecreaseJumpPower()
 {
     let newJumpLevel = 0;
-    if(g_ScoreJumpLevel > 3)
+    if(g_ScoreJumpLevel > g_ScoreJumpLevelMin)
     {
-        newJumpLevel = g_ScoreJumpLevel - 3;
+        newJumpLevel = g_ScoreJumpLevel - g_ScoreJumpLevelMin;
     }
     SetJumpPower(newJumpLevel);
 }
 
 function HasJumpPower()
 {
-    return (g_ScoreJumpLevel > 1);
+    return (g_ScoreJumpLevel >= g_ScoreJumpLevelMin);
 }

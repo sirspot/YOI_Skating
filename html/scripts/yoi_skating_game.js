@@ -51,6 +51,7 @@ let g_PorkCutletBowl = null;
 let g_FirstTransition = true;
 let g_Score = null;
 let g_Hangtime = 0;
+const g_RinkEntryPosition = 600;
 
 function SkaterMusicPlay()
 {
@@ -100,7 +101,6 @@ function SkaterAnimationDone()
 		// DONE LANDING
 		//
 		g_YuriKatsuki.m_SkaterState = SkaterState_e.LANDED;
-
 		if(g_YuriKatsuki.m_SkaterLocation != SkaterLocation_e.GROUND)
 		{
 			// done landing onto the ice
@@ -109,8 +109,43 @@ function SkaterAnimationDone()
 			{
 				if(g_YuriKatsuki.m_SkaterIsUp)
 				{
-					ShowScore("Incredible!", 1, true);
+					ShowScore("Incredible Jump\nEnjoy your Pork Cutlet Bowl!", 10, true);
 					asset("cheers!").play({volume:.15, interrupt:"none"});
+
+					if(g_PorkCutletBowl == null)
+					{
+						//
+						// PORK CUTLET BOWL
+						//
+						g_PorkCutletBowl = asset(assetsPathPng + "yoi_skating_bowl_soup.png").addTo().centerReg();
+						g_PorkCutletBowl.addTo();
+						g_PorkCutletBowl.centerReg();
+						g_PorkCutletBowl.sca(.3);
+						let bowlMargin = (g_PorkCutletBowl.width*g_PorkCutletBowl.scaleX)*2;
+						let bowlXPos = g_YuriKatsuki.m_SkaterRect.x + bowlMargin;
+						if(bowlXPos > (g_RectFloor.x + g_RectFloor.width))
+						{
+							bowlXPos = (g_YuriKatsuki.m_SkaterRect.x - bowlMargin);
+						}
+						if(bowlXPos < (g_RinkEntryPosition + bowlMargin))
+						{
+							bowlXPos = (g_RinkEntryPosition + bowlMargin);
+						}
+						let bowlYPos = (g_RectFloorTop - (g_PorkCutletBowl.height*g_PorkCutletBowl.scaleY));
+						g_PorkCutletBowl.pos(
+							bowlXPos, 
+							bowlYPos);
+						g_PorkCutletBowl.addPhysics(
+								{
+									friction:.8,
+									bounciness:.4,
+									maskBits:1|2,
+									categoryBits:1
+								}
+							);
+						g_PorkCutletBowl.impulse(0,-10);
+					}
+
 				}
 				else
 				{
@@ -210,10 +245,9 @@ g_ZimFrame.on("ready",
 		//
 		// RINK ENTRY
 		//
-		const entryPos = 600;
 		g_RectEntry = new Rectangle(10, g_FrameSettings.m_FrameHeight-g_PhysicsMargin.bottom)
 						.centerReg()
-						.pos(g_PhysicsMargin.right + entryPos, 0)
+						.pos(g_PhysicsMargin.right + g_RinkEntryPosition, 0)
 						.addPhysics({categoryBits:2,dynamic:false});
 		g_RectEntry.color = "rgba(175,175,175,.5)";
 
@@ -221,17 +255,16 @@ g_ZimFrame.on("ready",
 		// SCORE
 		//
 		const rinkWidth = g_FrameSettings.m_FrameWidth - (g_RectEntry.x + g_RectEntry.width);
-		zog("Rink Width = " + rinkWidth);
 		g_Score = ShowScore("Click to the left or right\nof Yuri to begin moving.", 0);
 		g_Score.addTo();
-		g_Score.pos(entryPos + (rinkWidth / 3), 60);
+		g_Score.pos(g_RinkEntryPosition + (rinkWidth / 3), 60);
 
 		//
 		// YURI KATSUKI
 		//
 		// create skater and add to the stage
 		g_YuriKatsuki.m_SkaterRect = new Rectangle(24,64);
-		g_YuriKatsuki.m_SkaterRect.color = "rgba(0,255,0,.2)";
+		g_YuriKatsuki.m_SkaterRect.color = "rgba(0,255,0,0)";
 		g_YuriKatsuki.m_SkaterRect.sca(g_GlobalScale);
 		g_YuriKatsuki.m_SkaterRect.centerReg();
 		g_YuriKatsuki.m_SkaterRect.addTo();
@@ -289,7 +322,7 @@ g_ZimFrame.on("ready",
 						else
 						{
 							// fell down on the ice
-							ShowScore("Oh no!",4,true);
+							ShowScore("Oh no!", 4, true);
 						}
 					}
 					else
@@ -315,25 +348,12 @@ g_ZimFrame.on("ready",
 						else
 						{
 							// fell down on the ground
-							ShowScore("Ooooff",4,true);
+							ShowScore("Ooooff", 4, true);
 						}
 					}
 				}
 			}
 		);
-
-		//
-		// PORK CUTLET BOWL
-		//
-		g_PorkCutletBowl = asset(assetsPathPng + "yoi_skating_bowl_soup.png").addTo().centerReg();
-		g_PorkCutletBowl.addTo();
-		g_PorkCutletBowl.centerReg();
-		g_PorkCutletBowl.sca(.3);
-		g_PorkCutletBowl.pos(entryPos + (rinkWidth/2), g_RectFloorTop - g_PorkCutletBowl.height*g_PorkCutletBowl.scaleY);
-		g_PorkCutletBowl.addPhysics({friction:.8,
-        bounciness:.4,
-        maskBits:1|2,
-        categoryBits:1});
 
 		//
 		// GAME LOGIC
@@ -359,8 +379,8 @@ g_ZimFrame.on("ready",
 				g_YuriKatsuki.m_SkaterSpriteLastY = g_YuriKatsuki.m_SkaterRect.y;
 
 				// determine if skater is standing up
-				const offAxisMin = 5;
-				const offAxisMax = 355;
+				const offAxisMin = 4;
+				const offAxisMax = (360 - offAxisMin);
 				let offAxis = (Math.abs(g_YuriKatsuki.m_SkaterRect.rotation) % 360);
 				if((offAxis >= offAxisMin) && (offAxis <= offAxisMax))
 				{
@@ -471,7 +491,14 @@ g_ZimFrame.on("ready",
 							g_YuriKatsuki.m_SkaterBoostsRemaining = g_YuriKatsuki.m_SkaterBoostsRemaining - 1;
 							if(g_YuriKatsuki.m_SkaterBoostsRemaining > 0)
 							{
-								ShowScore("Amazing!", 2, true);
+								if(g_YuriKatsuki.m_SkaterBoostsRemaining == 1)
+								{
+									ShowScore("Yes!", 2, true);
+								}
+								else
+								{
+									ShowScore("Amazing!", 2, true);
+								}
 							}
 						}
 						else
@@ -696,7 +723,17 @@ g_ZimFrame.on("ready",
 
 				if(g_YuriKatsuki.m_SkaterIsUp == false)
 				{
-					g_YuriKatsuki.m_SkaterRect.impulse(-2.5,-4,17,0);
+					g_YuriKatsuki.m_SkaterRect.impulse(0,-70);
+					timeout(.1, function()
+						{
+							let spinPower = 7;
+							if(g_YuriKatsuki.m_SkaterSprite.scaleX > 0)
+							{
+								spinPower = -7
+							}
+							g_YuriKatsuki.m_SkaterRect.spin(spinPower);
+						}
+					);					
 				}
 
 				if(g_YuriKatsuki.m_SkaterLocation == SkaterLocation_e.RINK_ICE)
