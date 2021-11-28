@@ -241,8 +241,6 @@ g_ZimFrame.on("ready",
 		g_ZimPhysics = new Physics(g_PhysicsSettings);
 		g_ZimPhysics.remove(g_ZimPhysics.borderTop);
 
-		let bgImg = asset(assetsPathPng + "yoi_skating_bg.png").addTo();
-
 		//
 		// FLOOR
 		//
@@ -271,6 +269,12 @@ g_ZimFrame.on("ready",
 		g_Score.pos(g_RinkEntryPosition + 20, 20);
 
 		//
+		// SPOTLIGHT
+		//
+		let spotLight = ShowSpotLight();
+		spotLight.addTo().pos(g_ZimStage.width - 200, -100);
+
+		//
 		// YURI KATSUKI
 		//
 		// create skater and add to the stage
@@ -287,7 +291,11 @@ g_ZimFrame.on("ready",
 		g_YuriKatsuki.m_SkaterSprite.pos(-20,0);
 		g_YuriKatsuki.m_SkaterRect.addChild(g_YuriKatsuki.m_SkaterSprite);
 
-		let fgImg = asset(assetsPathPng + "yoi_skating_fg.png").addTo().top().alp(.4);
+		//
+		// BACKGROUND AND FOREGROUND
+		//
+		let bgImg = asset(assetsPathPng + "yoi_skating_bg.png").addTo().bot();
+		let fgImg = asset(assetsPathPng + "yoi_skating_fg.png").addTo().top().alp(.4).pos(0,-20);
 
 		// calculate the size of skater on the stage
 		g_YuriKatsuki.m_SkaterWidth = (g_YuriKatsuki.m_SkaterSprite.width * g_YuriKatsuki.m_SkaterSprite.scaleX);
@@ -348,6 +356,7 @@ g_ZimFrame.on("ready",
 								// start landing immediately
 								g_YuriKatsuki.m_SkaterLocation = SkaterLocation_e.GROUND;
 								SkaterAnimate("landing", g_YuriKatsuki, .2, SkaterState_e.LANDING, "bend", SkaterAnimationDone);
+								SpotLightOff();
 							}
 							else
 							{
@@ -395,6 +404,7 @@ g_ZimFrame.on("ready",
 				{
 					g_YuriKatsuki.m_SkaterIsUp = false;
 					SetJumpPower(0);
+					SpotLightOff();
 				}
 				else
 				{
@@ -406,6 +416,14 @@ g_ZimFrame.on("ready",
 				if(g_YuriKatsuki.m_SkaterRect.x > g_RectEntry.x)
 				{
 					onIce = true;
+					if(g_YuriKatsuki.m_SkaterLocation == SkaterLocation_e.RINK_ICE)
+					{
+						if(g_YuriKatsuki.m_SkaterIsUp)
+						{
+							SpotLightOn();
+							MoveSpotLight(g_YuriKatsuki.m_SkaterRect.x);
+						}
+					}
 				}
 				if(onIce != g_YuriKatsuki.m_SkaterOnIce || g_FirstTransition)
 				{
@@ -445,6 +463,7 @@ g_ZimFrame.on("ready",
 								{
 									ShowScore("Nice job!", 4, true);
 								}
+								SpotLightOff();
 							}
 							else
 							{
@@ -611,6 +630,7 @@ g_ZimFrame.on("ready",
 								// keep spinning when above ankle height
 								SkaterAnimate("falling spin", g_YuriKatsuki, .45, SkaterState_e.SPINNING, "spin", SkaterAnimationDone);
 								g_Hangtime = g_Hangtime + 1;
+								SpotLightOff();
 							}
 							else
 							{
@@ -623,6 +643,7 @@ g_ZimFrame.on("ready",
 							// start spinning immediately
 							SkaterAnimate("rising spin", g_YuriKatsuki, .45, SkaterState_e.SPINNING, "spin", SkaterAnimationDone);
 							g_Hangtime = g_Hangtime + 1;
+							SpotLightOff();
 						}
 					}
 					else
