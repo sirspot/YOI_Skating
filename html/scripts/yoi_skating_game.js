@@ -49,7 +49,6 @@ let g_MouseButtonDown = false;
 let g_MouseButtonDownCount = -1;
 let g_IceRinkMusic = null;
 let g_FloorMusic = null;
-let g_PorkCutletBowl = null;
 let g_FirstTransition = true;
 let g_Score = null;
 let g_Hangtime = 0;
@@ -114,44 +113,46 @@ function SkaterAnimationDone()
 				{
 					asset("cheers!").play({volume:.15, interrupt:"none"});
 
-					if(g_PorkCutletBowl == null)
+					//
+					// PORK CUTLET BOWL
+					//
+					let porkCutletBowl = asset(assetsPathPng + "yoi_skating_bowl_soup.png").clone().addTo().centerReg();
+					porkCutletBowl.addTo().top().ord(-2);
+					porkCutletBowl.centerReg();
+					porkCutletBowl.sca(.3);
+					let bowlMargin = (porkCutletBowl.width*porkCutletBowl.scaleX)*8;
+					let bowlXPos = g_YuriKatsuki.m_SkaterRect.x + bowlMargin;
+					if(bowlXPos > (g_RectFloor.width - bowlMargin))
 					{
-						//
-						// PORK CUTLET BOWL
-						//
-						g_PorkCutletBowl = asset(assetsPathPng + "yoi_skating_bowl_soup.png").addTo().centerReg();
-						g_PorkCutletBowl.addTo().top().ord(-2);
-						g_PorkCutletBowl.centerReg();
-						g_PorkCutletBowl.sca(.3);
-						let bowlMargin = (g_PorkCutletBowl.width*g_PorkCutletBowl.scaleX)*8;
-						let bowlXPos = g_YuriKatsuki.m_SkaterRect.x + bowlMargin;
-						if(bowlXPos > (g_RectFloor.width - bowlMargin))
-						{
-							bowlXPos = (g_YuriKatsuki.m_SkaterRect.x - bowlMargin);
-						}
-						if(bowlXPos < (g_RinkEntryPosition + bowlMargin))
-						{
-							bowlXPos = (g_RinkEntryPosition + bowlMargin);
-						}
-						let bowlYPos = (g_RectFloorTop - (g_PorkCutletBowl.height*g_PorkCutletBowl.scaleY));
-						g_PorkCutletBowl.pos(
-							bowlXPos, 
-							bowlYPos);
-						g_PorkCutletBowl.addPhysics(
-								{
-									friction:.8,
-									bounciness:.4,
-									maskBits:1|2,
-									categoryBits:1
-								}
-							);
-						g_PorkCutletBowl.impulse(0,-11);
-						ShowScore("Incredible Jump\nEnjoy your Pork Cutlet Bowl!", 8, true);
+						bowlXPos = (g_YuriKatsuki.m_SkaterRect.x - bowlMargin);
 					}
-					else
+					if(bowlXPos < (g_RinkEntryPosition + bowlMargin))
 					{
-						ShowScore("Wow!", 3, true);
+						bowlXPos = (g_RinkEntryPosition + bowlMargin);
 					}
+					let bowlYPos = (g_RectFloorTop - (porkCutletBowl.height*porkCutletBowl.scaleY));
+					porkCutletBowl.pos(
+						bowlXPos, 
+						bowlYPos);
+					porkCutletBowl.addPhysics(
+							{
+								friction:.8,
+								bounciness:.4,
+								maskBits:1|2,
+								categoryBits:1
+							}
+						);
+					porkCutletBowl.contact(
+						function (obj, body)
+						{
+							if(obj == g_YuriKatsuki.m_SkaterRect)
+							{
+								porkCutletBowl.impulse(g_YuriKatsuki.m_SkaterSpriteXMove,-5);
+							}
+						}
+					);
+					porkCutletBowl.impulse(0,-11);
+					ShowScore("Incredible Jump\nEnjoy your Pork Cutlet Bowl!", 8, true);
 
 				}
 				else
@@ -267,7 +268,7 @@ g_ZimFrame.on("ready",
 		const rinkWidth = g_FrameSettings.m_FrameWidth - (g_RectEntry.x + g_RectEntry.width);
 		g_Score = ShowScore("Click to the left or right\nof Yuri to begin moving.", g_ShowInstructionsTime);
 		g_Score.addTo();
-		g_Score.pos(g_RinkEntryPosition + (rinkWidth / 3), 60);
+		g_Score.pos(g_RinkEntryPosition + 20, 20);
 
 		//
 		// YURI KATSUKI
@@ -300,11 +301,7 @@ g_ZimFrame.on("ready",
 		g_YuriKatsuki.m_SkaterRect.contact(
 			function (obj, body)
 			{
-				if(obj == g_PorkCutletBowl)
-				{
-					g_PorkCutletBowl.impulse(g_YuriKatsuki.m_SkaterSpriteXMove,-5);
-				}
-				else if (obj == g_RectFloor)
+				if (obj == g_RectFloor)
 				{
 					g_RectFloor.color = IceColor_e.DARK;
 
