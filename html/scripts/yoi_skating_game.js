@@ -73,6 +73,16 @@ function SkaterMusicPlay()
 			}
 			if(g_FloorMusic != null)
 			{
+				if(g_Makkachin.m_DogSprite)
+				{
+					g_Makkachin.m_DogSprite.run({time:.5, label:"idle", loop:false});
+					if(g_Makkachin.m_DogHasJumpedIn)
+					{
+						// Makkachin jumps away
+						g_Makkachin.m_DogSprite.impulse(-80,-150);
+						g_Makkachin.m_DogHasJumpedIn = false;
+					}
+				}
 				g_FloorMusic.stop();
 				g_FloorMusic = null;
 			}
@@ -86,6 +96,18 @@ function SkaterMusicPlay()
 			}			
 			if(g_IceRinkMusic != null)
 			{
+				g_Makkachin.m_DogSprite.run({time:.5, label:"wag", loop:true});
+				if(g_Makkachin.m_DogHasJumpedIn == false)
+				{
+					// first time stepping off the ice.
+					// bring in Makkachin
+					g_Makkachin.m_DogSprite.impulse(80,-150);
+					g_Makkachin.m_DogHasJumpedIn = true;
+				}
+				else
+				{
+					g_Makkachin.m_DogSprite.impulse(0,-80);
+				}
 				g_IceRinkMusic.stop();
 				g_IceRinkMusic = null;
 			}
@@ -291,13 +313,21 @@ g_ZimFrame.on("ready",
 		g_YuriKatsuki.m_SkaterSpriteSettings.image = g_YuriKatsuki.m_SkaterAsset;
 		g_YuriKatsuki.m_SkaterSprite = new Sprite(g_YuriKatsuki.m_SkaterSpriteSettings);
 		g_YuriKatsuki.m_SkaterSprite.centerReg();
-		g_YuriKatsuki.m_SkaterSprite.pos(64, g_FrameSettings.m_FrameHeight-(g_PhysicsMargin.bottom));
+		g_YuriKatsuki.m_SkaterSprite.pos(-20,0);
 		g_YuriKatsuki.m_SkaterRect.addChild(g_YuriKatsuki.m_SkaterSprite);
 
 		//
 		// MAKKACHIN
 		//
-		g_Makkachin = {m_DogAsset:null,m_DogSprite:null,m_DogSpriteSettings:null};
+		g_Makkachin = 
+		{
+			m_DogAsset:null,
+			m_DogSprite:null,
+			m_DogSpriteSettings:null,
+			m_DogFloor:null,
+			m_DogHasJumpedIn:false
+		};
+
 		g_Makkachin.m_DogAsset = asset(assetsPathPng + "yoi_skating_spritesheet_makkachin.png");
 		g_Makkachin.m_DogSpriteSettings = 
 		{
@@ -313,8 +343,30 @@ g_ZimFrame.on("ready",
 		g_Makkachin.m_DogSprite = new Sprite(g_Makkachin.m_DogSpriteSettings);
 		g_Makkachin.m_DogSprite.sca(g_GlobalScale);
 		g_Makkachin.m_DogSprite.centerReg();
+
+		g_Makkachin.m_DogFloor = new Rectangle(g_FrameSettings.m_FrameWidth+(g_Makkachin.m_DogSprite.width*g_GlobalScale),5);
+		g_Makkachin.m_DogFloor.centerReg();
+		g_Makkachin.m_DogFloor.addTo();
+		g_Makkachin.m_DogFloor.pos(0-(g_Makkachin.m_DogSprite.width*g_GlobalScale),g_FrameSettings.m_FrameHeight-g_PhysicsMargin.bottom+10);
+		g_Makkachin.m_DogFloor.addPhysics(
+			{
+				maskBits:4,
+				categoryBits:4,
+				dynamic: false
+			}
+		);
+
 		g_Makkachin.m_DogSprite.addTo();
-		g_Makkachin.m_DogSprite.pos(-20,0);
+		g_Makkachin.m_DogSprite.pos(0-g_Makkachin.m_DogSprite.width,g_FrameSettings.m_FrameHeight-g_PhysicsMargin.bottom+10-g_Makkachin.m_DogSprite.height);
+		g_Makkachin.m_DogSprite.run({time:.5, label:"idle", loop:false});
+		g_Makkachin.m_DogSprite.addPhysics(
+			{
+				friction:.2,
+				bounciness:.4,
+				maskBits:4,
+				categoryBits:4,
+			}
+		);
 
 		//
 		// BACKGROUND AND FOREGROUND
