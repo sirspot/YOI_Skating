@@ -53,6 +53,7 @@ let g_FloorMusic = null;
 let g_FirstTransition = true;
 let g_Score = null;
 let g_Hangtime = 0;
+let g_SkatingHangtime = 0;
 let g_ShowInstructionsTime = 0;
 const g_RinkEntryPosition = 600;
 
@@ -97,17 +98,14 @@ function SkaterMusicPlay()
 			if(g_IceRinkMusic != null)
 			{
 				g_Makkachin.m_DogSprite.run({time:.5, label:"wag", loop:true});
-				if(g_Makkachin.m_DogHasJumpedIn == false)
+				if(g_SkatingHangtime > 2)
 				{
-					// first time stepping off the ice.
+					// first time stepping off the ice after jumps
 					// bring in Makkachin
 					g_Makkachin.m_DogSprite.impulse(80,-150);
 					g_Makkachin.m_DogHasJumpedIn = true;
 				}
-				else
-				{
-					g_Makkachin.m_DogSprite.impulse(0,-80);
-				}
+				g_SkatingHangtime = 0;
 				g_IceRinkMusic.stop();
 				g_IceRinkMusic = null;
 			}
@@ -355,6 +353,7 @@ g_ZimFrame.on("ready",
 				dynamic: false
 			}
 		);
+		g_Makkachin.m_DogFloor.color = "rgba(100,150,255,.1)";
 
 		g_Makkachin.m_DogSprite.addTo();
 		g_Makkachin.m_DogSprite.pos(0-g_Makkachin.m_DogSprite.width,g_FrameSettings.m_FrameHeight-g_PhysicsMargin.bottom+10-g_Makkachin.m_DogSprite.height);
@@ -482,6 +481,7 @@ g_ZimFrame.on("ready",
 					g_YuriKatsuki.m_SkaterIsUp = false;
 					SetJumpPower(0);
 					SpotLightOff();
+					g_SkatingHangtime = 0;
 				}
 				else
 				{
@@ -536,10 +536,16 @@ g_ZimFrame.on("ready",
 								g_YuriKatsuki.m_SkaterRect.body.GetFixtureList().SetFriction(.02);
 								SkaterAnimate("idle", g_YuriKatsuki, .1, SkaterState_e.IDLE, "idle", SkaterAnimationDone);
 								asset("cheer").play({volume:.1, interrupt:"none"});
-								if(g_MouseButtonDownCount >= 0)
+								if(g_SkatingHangtime > 2)
+								{
+									// Makkachin will jump in
+									ShowScore("It's Makkachin!", 4, true);
+								}
+								else if(g_MouseButtonDownCount >= 0)
 								{
 									ShowScore("Nice job!", 4, true);
 								}
+								
 								SpotLightOff();
 							}
 							else
@@ -707,6 +713,7 @@ g_ZimFrame.on("ready",
 								// keep spinning when above ankle height
 								SkaterAnimate("falling spin", g_YuriKatsuki, .45, SkaterState_e.SPINNING, "spin", SkaterAnimationDone);
 								g_Hangtime = g_Hangtime + 1;
+								g_SkatingHangtime = g_SkatingHangtime + 1;
 								SpotLightOff();
 							}
 							else
@@ -720,6 +727,7 @@ g_ZimFrame.on("ready",
 							// start spinning immediately
 							SkaterAnimate("rising spin", g_YuriKatsuki, .45, SkaterState_e.SPINNING, "spin", SkaterAnimationDone);
 							g_Hangtime = g_Hangtime + 1;
+							g_SkatingHangtime = g_SkatingHangtime + 1;
 							SpotLightOff();
 						}
 					}
