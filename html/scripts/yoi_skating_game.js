@@ -10,6 +10,7 @@ g_FrameSettings.m_FrameAssets =
 	assetsPathPng + "yoi_skating_bg.png",
 	assetsPathPng + "yoi_skating_fg.png",
 	assetsPathPng + "yoi_skating_bowl_soup.png",
+	assetsPathPng + "yoi_skating_spritesheet_makkachin.png",
 	assetsPathPng + g_YuriKatsuki.m_SkaterAssetFilename,
 	{id:"floor",   maxNum:1, src: assetsPathMp3 + "yoi_skating_music_floor.mp3"},
 	{id:"music",   maxNum:1, src: assetsPathMp3 + "yoi_skating_music_ice_rink.mp3"},
@@ -54,6 +55,8 @@ let g_Score = null;
 let g_Hangtime = 0;
 let g_ShowInstructionsTime = 0;
 const g_RinkEntryPosition = 600;
+
+let g_Makkachin = null;
 
 function SkaterMusicPlay()
 {
@@ -288,8 +291,30 @@ g_ZimFrame.on("ready",
 		g_YuriKatsuki.m_SkaterSpriteSettings.image = g_YuriKatsuki.m_SkaterAsset;
 		g_YuriKatsuki.m_SkaterSprite = new Sprite(g_YuriKatsuki.m_SkaterSpriteSettings);
 		g_YuriKatsuki.m_SkaterSprite.centerReg();
-		g_YuriKatsuki.m_SkaterSprite.pos(-20,0);
+		g_YuriKatsuki.m_SkaterSprite.pos(64, g_FrameSettings.m_FrameHeight-(g_PhysicsMargin.bottom));
 		g_YuriKatsuki.m_SkaterRect.addChild(g_YuriKatsuki.m_SkaterSprite);
+
+		//
+		// MAKKACHIN
+		//
+		g_Makkachin = {m_DogAsset:null,m_DogSprite:null,m_DogSpriteSettings:null};
+		g_Makkachin.m_DogAsset = asset(assetsPathPng + "yoi_skating_spritesheet_makkachin.png");
+		g_Makkachin.m_DogSpriteSettings = 
+		{
+			image:g_Makkachin.m_DogAsset,
+			cols:5,
+			rows:1,
+			animations:
+			{
+				idle:[0,0],
+				wag:[0,4]
+			}
+		};
+		g_Makkachin.m_DogSprite = new Sprite(g_Makkachin.m_DogSpriteSettings);
+		g_Makkachin.m_DogSprite.sca(g_GlobalScale);
+		g_Makkachin.m_DogSprite.centerReg();
+		g_Makkachin.m_DogSprite.addTo();
+		g_Makkachin.m_DogSprite.pos(-20,0);
 
 		//
 		// BACKGROUND AND FOREGROUND
