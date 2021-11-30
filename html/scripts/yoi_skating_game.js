@@ -894,6 +894,25 @@ g_ZimFrame.on("ready",
 			}
 		);
 
+		let popup = new Pane(
+				{
+					label:"",
+					corner:0,
+					color:white,
+					backgroundColor:g_FrameSettings.m_FrameOuterColor,
+					width:g_ZimFrame.width,
+					height:g_ZimFrame.height,
+					modal:true,
+					displayClose:false
+				}
+			);
+		let cancel = new Button(220, 80, "Play", "grey").center(popup).mov(-130, 80);
+		let confirm = new Button(220, 80, "About", "grey").center(popup).mov(130, 80);
+		cancel.on("click", function() {popup.hide();});
+		confirm.on("click", function() {zgo("https://sirspot.github.io/YOI_Skating/")});
+		popup.text = "Welcome to Yuri On Ice!\n\nSkating Minigame\n\n\n\n";
+		popup.show();
+
 		g_ZimStage.update();
 	}
 );

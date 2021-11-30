@@ -77,6 +77,15 @@ function ShowScore(message, showFor, allowAnimate)
     // SET SCORE MESSAGE
     //
     g_ScoreMessage.text = message;
+    if(message.includes("\n"))
+    {
+        g_ScoreMessage.size = 25;
+    }
+    else
+    {
+        g_ScoreMessage.size = 40;
+    }
+    g_ScoreMessage.centerReg().center(g_ScoreMessageBox);
 
     if(animateText && allowAnimate === true)
     {

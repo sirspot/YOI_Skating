@@ -13,7 +13,7 @@ const g_FrameSettings =
 	m_FrameScaling:"fit",
 	m_FrameWidth:1800,
 	m_FrameHeight:500,
-	m_FrameColor:"#9090FF",
+	m_FrameColor:"#AAAAFF",
 	m_FrameOuterColor:"#AAAAFF"
 };
 
